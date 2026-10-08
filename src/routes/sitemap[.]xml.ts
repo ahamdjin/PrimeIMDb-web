@@ -4,7 +4,7 @@ export const Route = createFileRoute('/sitemap.xml')({
   server: { handlers: {
     GET: async ({ request }) => {
       const origin = (process.env.SITE_URL || new URL(request.url).origin).replace(/\/$/, '')
-      const routes = new Set(['/', '/movies', '/tv', '/free-movies', '/genres', '/about'])
+      const routes = new Set(['/', '/movies', '/tv', '/free-movies', '/genres', '/about', '/journal/how-to-watch-movies-free-legally'])
       const [films, shows, open, categories] = await Promise.all([
         trending('movie'), trending('tv'), discover('movie', { free: true }), genres('movie'),
       ])

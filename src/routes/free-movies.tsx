@@ -25,6 +25,7 @@ function Page() {
     <form className="controls-row" action="/free-movies" method="get"><label htmlFor="region">YOUR COUNTRY <select id="region" name="region" defaultValue={region}>{countries.map(c => <option value={c.code} key={c.code}>{c.name}</option>)}</select></label><button type="submit">Update view →</button></form>
     <Grid items={data.items}/>
     <div className="paging">{page > 1 && <a href={'/free-movies?region=' + region + '&page=' + (page-1)}>← Previous</a>}<span>PAGE {String(page).padStart(2,'0')}</span>{page < data.pages && <a href={'/free-movies?region=' + region + '&page=' + (page+1)}>Next →</a>}</div>
+    <aside className="reading-promo"><span className="eyebrow">THE JOURNAL / FREE FILM GUIDE</span><h2>What does “free to watch” really mean?</h2><p>Understand ad-supported services, library access, country restrictions, and how to verify a legitimate viewing offer.</p><a href="/journal/how-to-watch-movies-free-legally" className="text-link">Read the free viewing guide ↗</a></aside>
     <p className="source-note">Free-to-watch discovery is based on TMDB watch-provider records, which incorporate JustWatch data. This is an availability directory, not a streaming or hosting service; offerings depend on your region and may require ads or an account.</p>
   </div>
 }
