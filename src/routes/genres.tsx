@@ -1,0 +1,3 @@
+import {createFileRoute,Link} from '@tanstack/react-router';import {getGenres} from '../lib/server'
+export const Route=createFileRoute('/genres')({loader:()=>getGenres(),head:()=>({meta:[{title:'Movie Genres — Find Films by Category | Prime IMDb'},{name:'description',content:'Browse action, adventure, comedy, drama, documentary and other film categories.'}]}),component:Page})
+function Page(){const genres=Route.useLoaderData();return <div className="wrap inner"><span className="eyebrow">ALL KINDS OF STORIES</span><h1>Movie genres<span className="accent">.</span></h1><div className="genre-grid">{genres.map(g=><Link to="/genre/$id" params={{id:String(g.id)}} key={g.id}>{g.name}<span>↗</span></Link>)}</div></div>}

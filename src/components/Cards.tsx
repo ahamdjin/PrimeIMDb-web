@@ -1,0 +1,5 @@
+import { Link } from '@tanstack/react-router'
+import type {Movie} from '../lib/tmdb'
+export function Card({item}:{item:Movie}){return <Link to="/$kind/$id" params={{kind:item.kind,id:String(item.id)}} className="card"><div className="poster">{item.poster?<img src={item.poster} loading="lazy" alt={item.title+' poster'}/>:<div className="missing">No image</div>}<span className="score">★ {item.rating?item.rating.toFixed(1):'—'}</span></div><h3>{item.title}</h3><p>{item.year||'Upcoming'} <span>•</span> {item.kind==='movie'?'Movie':'TV series'}</p></Link>}
+export function Grid({items}:{items:Movie[]}){return items.length?<div className="grid">{items.map(m=><Card item={m} key={m.kind+m.id}/>)}</div>:<p className="empty">Nothing found yet. Try another category.</p>}
+export function Section({title,eyebrow,items,href}:{title:string;eyebrow:string;items:Movie[];href:string}){return <section className="section"><div className="section-head"><div><span className="eyebrow">{eyebrow}</span><h2>{title}</h2></div><a href={href}>View all ↗</a></div><Grid items={items.slice(0,12)}/></section>}
