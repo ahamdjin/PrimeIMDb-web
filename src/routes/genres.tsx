@@ -1,3 +1,17 @@
-import {createFileRoute,Link} from '@tanstack/react-router';import {getGenres} from '../lib/server'
-export const Route=createFileRoute('/genres')({loader:()=>getGenres(),head:()=>({meta:[{title:'Movie Genres — Find Films by Category | Prime IMDb'},{name:'description',content:'Browse action, adventure, comedy, drama, documentary and other film categories.'}]}),component:Page})
-function Page(){const genres=Route.useLoaderData();return <div className="wrap inner"><span className="eyebrow">ALL KINDS OF STORIES</span><h1>Movie genres<span className="accent">.</span></h1><div className="genre-grid">{genres.map(g=><Link to="/genre/$id" params={{id:String(g.id)}} key={g.id}>{g.name}<span>↗</span></Link>)}</div></div>}
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { getGenres } from '../lib/server'
+import { canonical } from '../lib/seo'
+export const Route = createFileRoute('/genres')({
+  loader: () => getGenres(),
+  head: () => ({ meta: [{ title: 'Explore Film Genres — Find Your Kind of Story | Prime IMDb' },
+    { name: 'description', content: 'Browse cinema by genre: drama, comedy, action, horror, documentary and many more.' }],
+    links: canonical('/genres') }),
+  component: Page,
+})
+function Page() {
+  const items = Route.useLoaderData()
+  return <div className="page-container inner-page">
+    <header className="page-lead"><span className="eyebrow">A GENRE FOR EVERY MOOD</span><h1>Follow your <em>curiosity.</em></h1><p>Stories travel in every direction. Choose your next adventure by the feeling it leaves behind.</p></header>
+    <div className="genre-grid">{items.map(g => <Link key={g.id} to="/genre/$id" params={{ id: String(g.id) }}>{g.name}<span>↗</span></Link>)}</div>
+  </div>
+}

@@ -1,3 +1,102 @@
-import {createFileRoute,Link,notFound} from '@tanstack/react-router';import {getDetails} from '../lib/server';import {image} from '../lib/tmdb';import {Grid} from '../components/Cards'
-export const Route=createFileRoute('/$kind/$id')({loader:async({params})=>{if(!['movie','tv'].includes(params.kind)||!/^\d+$/.test(params.id))throw notFound();const d=await getDetails({data:{kind:params.kind as 'movie'|'tv',id:Number(params.id)}});if(!d.item)throw notFound();return d},head:({loaderData})=>{const d=loaderData?.item;return {meta:[{title:d?`${d.title} (${d.year}) — Cast, Rating & Where to Watch | Prime IMDb`:'Title not found'},{name:'description',content:(d?.overview||'Movie details, cast, credits and official viewing options.').slice(0,155)},{property:'og:image',content:d?.backdrop||d?.poster||''}],links:d?[{rel:'canonical',href:`${import.meta.env.VITE_SITE_URL||'https://example.com'}/${d.kind}/${d.id}`}]:[]}},component:Page})
-function Page(){const {item:m,where}=Route.useLoaderData();if(!m)return null;const free=[...(where?.free||[]),...(where?.ads||[])];const subscription=where?.flatrate||[];return <><section className="detail-hero" style={m.backdrop?{backgroundImage:`linear-gradient(90deg,#0b0d14 12%,rgba(11,13,20,.84) 54%,rgba(11,13,20,.54)),url("${m.backdrop}")`}:{}}><div className="wrap detail-wrap">{m.poster&&<img src={m.poster} className="detail-poster" alt={m.title+' poster'}/>}<div><span className="eyebrow">{m.kind==='tv'?'TELEVISION SERIES':'FEATURE FILM'}</span><h1>{m.title}</h1>{m.tagline&&<p className="tagline">{m.tagline}</p>}<p className="facts">{m.year} <span>•</span> {m.runtime?`${m.runtime} min • `:''} ★ {m.rating?m.rating.toFixed(1):'—'} / 10 <span>•</span> {m.votes.toLocaleString()} ratings</p><p className="overview">{m.overview||'Synopsis not yet available.'}</p><div className="chips">{m.genres.map(g=><span key={g.id}>{g.name}</span>)}</div>{m.trailers?.[0]&&<a className="btn" href={`https://www.youtube.com/watch?v=${encodeURIComponent(m.trailers[0].key)}`} rel="noopener noreferrer" target="_blank">▶ Official trailer ↗</a>}</div></div></section><div className="wrap content detail-body"><div className="detail-cols"><div><div className="section-head"><div><span className="eyebrow">THE PEOPLE</span><h2>Top cast</h2></div></div><div className="cast-grid">{m.cast?.map(p=><Link key={p.id} to="/person/$id" params={{id:String(p.id)}} className="person-card">{p.profile_path?<img src={image(p.profile_path,'w185')||''} alt={p.name} loading="lazy"/>:<div className="avatar-missing">◌</div>}<strong>{p.name}</strong><small>{p.character}</small></Link>)}</div></div><aside className="where"><span className="eyebrow">WHERE TO WATCH</span><h2>Find it officially.</h2><p>Availability shown for the US and may change. Links lead to provider discovery pages; confirm the title before paying.</p>{free.length>0&&<><h3>Free / ad-supported</h3>{free.map(p=><div className="provider" key={p.provider_name}><span>{p.provider_name}</span><b>FREE*</b></div>)}</>}{subscription.length>0&&<><h3>Subscription services</h3>{subscription.map(p=><div className="provider" key={p.provider_name}>{p.provider_name}</div>)}</>}{where?.link?<a href={where.link} rel="nofollow noopener noreferrer" target="_blank" className="btn secondary">View official availability ↗</a>:<p>No confirmed provider listings for this region.</p>}<small>Watch-provider data supplied by TMDB / JustWatch. We do not host or offer playback on this information site.</small></aside></div>{m.seasons&&<section className="section"><span className="eyebrow">EPISODE GUIDE</span><h2>Seasons</h2><div className="genre-grid">{m.seasons.map(s=><div key={s.id}>{s.name} <small>{s.episode_count} episodes</small></div>)}</div></section>}{!!m.similar?.length&&<div className="section"><div className="section-head"><div><span className="eyebrow">KEEP DISCOVERING</span><h2>You may also like</h2></div></div><Grid items={m.similar}/></div>}</div></>}
+import { createFileRoute, Link, notFound } from '@tanstack/react-router'
+import { ArrowUpRight, Play, CalendarDays, Clock3, Star } from 'lucide-react'
+import { getDetails } from '../lib/server'
+import { image } from '../lib/tmdb'
+import { Grid } from '../components/Cards'
+import { canonical, schema, movieSchema, movieMeta } from '../lib/seo'
+
+const countries = [{code:'US',name:'United States'},{code:'GB',name:'United Kingdom'},{code:'CA',name:'Canada'},{code:'AU',name:'Australia'},{code:'IN',name:'India'},{code:'PK',name:'Pakistan'},{code:'DE',name:'Germany'},{code:'FR',name:'France'}]
+export const Route = createFileRoute('/$kind/$id')({
+  validateSearch: (s: Record<string, unknown>) => ({
+    region: typeof s.region === 'string' && countries.some(c => c.code === s.region.toUpperCase()) ? s.region.toUpperCase() : 'US',
+  }),
+  loaderDeps: ({search}) => search,
+  loader: async ({ params, deps }) => {
+    if (!['movie','tv'].includes(params.kind) || !/^\d+$/.test(params.id)) throw notFound()
+    const result = await getDetails({ data: { kind: params.kind as 'movie' | 'tv', id: Number(params.id), region: deps.region } })
+    if (!result.item) throw notFound()
+    return result
+  },
+  head: ({ loaderData, params }) => {
+    const movie = loaderData?.item
+    return movie ? {
+      meta: movieMeta(movie),
+      links: canonical('/' + params.kind + '/' + params.id),
+      scripts: schema(movieSchema(movie)),
+    } : { meta: [{ title: 'Film details | Prime IMDb' }, { name: 'robots', content: 'noindex' }] }
+  },
+  component: Page,
+})
+function Page() {
+  const { item: m, where } = Route.useLoaderData()
+  const { region } = Route.useSearch()
+  const label = countries.find(c => c.code === region)?.name || 'United States'
+  const free = [...(where?.free || []), ...(where?.ads || [])].filter((p,i,a) => a.findIndex(v => v.provider_id === p.provider_id) === i)
+  const subscription = where?.flatrate || []
+  const allProviders = free.length + subscription.length + (where?.rent?.length || 0) + (where?.buy?.length || 0)
+  if (!m) return null
+  return <>
+    <section className="detail-hero">
+      <div className="detail-hero-bg" style={m.backdrop ? { backgroundImage: 'url("' + m.backdrop + '")' } : undefined}/>
+      <div className="detail-hero-overlay"/>
+      <div className="page-container detail-wrap">
+        {m.poster ? <img src={m.poster} className="detail-poster" alt={m.title + ' theatrical poster'}/> : <div className="detail-poster poster-placeholder">✳</div>}
+        <div>
+          <span className="eyebrow">{m.kind === 'tv' ? 'TELEVISION / SERIES' : 'CINEMA / FEATURE FILM'} — THE TITLE ARCHIVE</span>
+          <h1>{m.title}</h1>
+          {m.tagline && <p className="detail-tagline">{m.tagline}</p>}
+          <div className="detail-meta">
+            {m.year && <span><CalendarDays size={14}/> {m.year}</span>}
+            {m.runtime && <span><Clock3 size={14}/> {m.runtime} MIN</span>}
+            {m.votes > 0 && <b><Star size={14} fill="currentColor"/> {m.rating.toFixed(1)} / 10 TMDB</b>}
+          </div>
+          <p className="detail-overview">{m.overview || 'An editorial synopsis is not currently available from our metadata provider.'}</p>
+          <div className="detail-chips">{m.genres.map(g => <Link key={g.id} to="/genre/$id" params={{ id: String(g.id) }}>{g.name}</Link>)}</div>
+          <div className="detail-actions">
+            {m.trailers?.[0] && <a href={'https://www.youtube.com/watch?v=' + encodeURIComponent(m.trailers[0].key)} target="_blank" rel="noopener noreferrer" className="btn inverse"><Play size={17} fill="currentColor"/> Watch trailer</a>}
+            <a className="btn outline" href="#availability">Official viewing options <ArrowUpRight size={18}/></a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div className="page-container detail-body">
+      <div className="detail-columns">
+        <div>
+          <div className="detail-heading"><div><span className="eyebrow">BEHIND THE STORY</span><h2>The people who made it.</h2></div></div>
+          {m.cast?.length ? <div className="cast-grid">{m.cast.slice(0,12).map(person => <Link key={person.id} to="/person/$id" params={{id:String(person.id)}} className="person-card">
+            {person.profile_path ? <img src={image(person.profile_path,'w185') || ''} alt={person.name} loading="lazy"/> : <div className="avatar-missing">✳</div>}
+            <strong>{person.name}</strong><small>{person.character}</small>
+          </Link>)}</div> : <p className="source-note">Cast data is not yet available for this title.</p>}
+          <div className="fact-box">
+            {m.directors?.length ? <div><small>{m.kind==='tv'?'SHOW CREATORS / PRODUCERS':'DIRECTED BY'}</small><p>{m.directors.map(x=>x.name).join(', ')}</p></div> : null}
+            {m.writers?.length ? <div><small>WRITTEN BY</small><p>{m.writers.map(x=>x.name).join(', ')}</p></div> : null}
+            {m.originalLanguage && <div><small>ORIGINAL LANGUAGE</small><p>{m.originalLanguage.toUpperCase()}</p></div>}
+            {m.status && <div><small>STATUS</small><p>{m.status}</p></div>}
+            {m.tvStatus && <div><small>TVMAZE STATUS</small><p>{m.tvStatus}{m.tvNetwork ? ' · ' + m.tvNetwork : ''}</p></div>}
+            {m.awards && <div><small>AWARDS INFORMATION / OMDB</small><p>{m.awards}</p></div>}
+          </div>
+          {!!m.externalRatings?.length && <section className="editorial-section"><span className="eyebrow">CROSS-SOURCE PERSPECTIVE</span><h2>More rating sources.</h2><div className="additional-ratings">{m.externalRatings.map((r,i)=><div key={i}><span>{r.source}</span><strong>{r.value}</strong></div>)}</div><p className="source-note">Supplemental scores are provided by OMDb when connected and licensed; methodologies may differ.</p></section>}
+          {!!m.seasons?.length && <section className="editorial-section"><div className="section-heading"><div><span className="eyebrow">EPISODES & SEASONS</span><h2>The series guide.</h2></div></div><div className="genre-grid">{m.seasons.filter(s=>s.season_number>0).map(s=><div key={s.id}>{s.name}<span>{s.episode_count} EPISODES</span></div>)}</div></section>}
+        </div>
+        <aside className="where-panel" id="availability">
+          <span className="eyebrow">THE VIEWING GUIDE</span>
+          <h2>Where to watch.</h2>
+          <p>Legal availability listings from TMDB / JustWatch. Choose a region and check the provider before paying or signing up.</p>
+          <form className="controls-row" action={'/' + m.kind + '/' + m.id} method="get">
+            <label htmlFor="watch-country">COUNTRY <select id="watch-country" name="region" defaultValue={region}>{countries.map(c=><option key={c.code} value={c.code}>{c.name}</option>)}</select></label>
+            <button type="submit">↗</button>
+          </form>
+          {!!free.length && <><h3>Listed as free or ad-supported</h3>{free.map(p=><div className="provider" key={p.provider_id}>
+            {p.logo_path && <img src={image(p.logo_path,'w92') || ''} alt="" loading="lazy"/>}<span>{p.provider_name}</span><b>FREE / ADS*</b>
+          </div>)}</>}
+          {!!subscription.length && <><h3>Subscription</h3>{subscription.map(p=><div className="provider" key={p.provider_id}>{p.logo_path && <img src={image(p.logo_path,'w92') || ''} alt="" loading="lazy"/>}{p.provider_name}</div>)}</>}
+          {!!where?.rent?.length && <><h3>Rent</h3>{where.rent.map(p=><div className="provider" key={p.provider_id}>{p.provider_name}</div>)}</>}
+          {!allProviders && <p>No verified provider listing is currently available for {label}.</p>}
+          {where?.link && <a className="btn primary" href={where.link} target="_blank" rel="noopener nofollow noreferrer">Check viewing links <ArrowUpRight size={16}/></a>}
+          <small>*A listing as free or ad-supported does not guarantee that it is currently accessible without registration, advertisements, geographical limitations or other conditions. JustWatch is the source of viewing availability via TMDB. The link above opens the TMDB viewing guide, not a video player.</small>
+        </aside>
+      </div>
+      {!!m.similar?.length && <section className="editorial-section"><div className="section-heading"><div><span className="eyebrow">CONTINUE EXPLORING</span><h2>If you liked this, keep looking.</h2></div></div><Grid items={m.similar.slice(0,6)}/></section>}
+    </div>
+  </>
+}
