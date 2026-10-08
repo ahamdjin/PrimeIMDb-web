@@ -6,7 +6,7 @@ const countries = [{code:'US',name:'United States'},{code:'GB',name:'United King
 export const Route = createFileRoute('/free-movies')({
   validateSearch: (s: Record<string, unknown>) => ({
     page: Math.max(1, Math.min(500, Number(s.page) || 1)),
-    region: typeof s.region === 'string' && countries.some(c => c.code === s.region.toUpperCase()) ? s.region.toUpperCase() : 'US',
+    region: typeof s.region === 'string' && countries.some(c => c.code === (s.region as string).toUpperCase()) ? (s.region as string).toUpperCase() : 'US',
   }),
   loaderDeps: ({ search }) => search,
   loader: ({ deps }) => getBrowse({ data: { kind: 'movie', free: true, page: deps.page, region: deps.region } }),

@@ -8,7 +8,7 @@ import { canonical, schema, movieSchema, movieMeta } from '../lib/seo'
 const countries = [{code:'US',name:'United States'},{code:'GB',name:'United Kingdom'},{code:'CA',name:'Canada'},{code:'AU',name:'Australia'},{code:'IN',name:'India'},{code:'PK',name:'Pakistan'},{code:'DE',name:'Germany'},{code:'FR',name:'France'}]
 export const Route = createFileRoute('/$kind/$id')({
   validateSearch: (s: Record<string, unknown>) => ({
-    region: typeof s.region === 'string' && countries.some(c => c.code === s.region.toUpperCase()) ? s.region.toUpperCase() : 'US',
+    region: typeof s.region === 'string' && countries.some(c => c.code === (s.region as string).toUpperCase()) ? (s.region as string).toUpperCase() : 'US',
   }),
   loaderDeps: ({search}) => search,
   loader: async ({ params, deps }) => {

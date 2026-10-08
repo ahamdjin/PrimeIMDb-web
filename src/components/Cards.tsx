@@ -3,7 +3,7 @@ import { ArrowUpRight } from 'lucide-react'
 import type { Movie } from '../lib/tmdb'
 
 export function Card({ item, number }: { item: Movie; number?: number }) {
-  return <Link to="/$kind/$id" params={{ kind: item.kind, id: String(item.id) }} className="film-card">
+  return <Link to="/$kind/$id" search={{region:"US"}} params={{ kind: item.kind, id: String(item.id) }} className="film-card">
     <div className="film-card-image">
       {item.poster ? <img src={item.poster} alt={item.title + ' theatrical poster'} loading="lazy" decoding="async"/> : <div className="poster-placeholder"><span>✳</span><small>ARTWORK UNAVAILABLE</small></div>}
       {number && <span className="rank-number">{String(number).padStart(2,'0')}</span>}

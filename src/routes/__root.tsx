@@ -31,9 +31,9 @@ function Layout() {
       <div className="page-container header-inner">
         <Link to="/" className="wordmark" aria-label="Prime IMDb home"><span className="wordmark-symbol">P<span>✳</span></span><span className="wordmark-name">PRIME <b>IMDb</b><small>THE SCREEN JOURNAL</small></span></Link>
         <nav aria-label="Primary navigation" className="main-navigation">
-          <Link to="/movies" activeProps={{className:'active'}}>Films</Link>
-          <Link to="/tv" activeProps={{className:'active'}}>Television</Link>
-          <Link to="/free-movies" activeProps={{className:'active'}}>Watch for free</Link>
+          <Link to="/movies" search={{page:1}} activeProps={{className:'active'}}>Films</Link>
+          <Link to="/tv" search={{page:1}} activeProps={{className:'active'}}>Television</Link>
+          <Link to="/free-movies" search={{page:1,region:"US"}} activeProps={{className:'active'}}>Watch for free</Link>
           <Link to="/genres" activeProps={{className:'active'}}>Explore</Link>
         </nav>
         <form className="header-search" action="/search" method="get">
@@ -48,7 +48,7 @@ function Layout() {
       <div className="page-container">
         <div className="footer-main">
           <div><p className="footer-kicker">A BETTER WAY TO FIND WHAT'S NEXT.</p><strong className="footer-title">Good stories<br/><em>stay with us.</em></strong></div>
-          <div className="footer-links"><span>DISCOVER</span><Link to="/movies">All films</Link><Link to="/tv">TV & series</Link><Link to="/free-movies">Free viewing guide</Link><Link to="/genres">Explore genres</Link></div>
+          <div className="footer-links"><span>DISCOVER</span><Link to="/movies" search={{page:1}}>All films</Link><Link to="/tv" search={{page:1}}>TV & series</Link><Link to="/free-movies" search={{page:1,region:"US"}}>Free viewing guide</Link><Link to="/genres">Explore genres</Link></div>
           <div className="footer-links"><span>ABOUT</span><Link to="/about">About & sources</Link><a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">The Movie Database <ArrowUpRight size={13}/></a><a href="https://www.justwatch.com/" target="_blank" rel="noopener noreferrer">JustWatch <ArrowUpRight size={13}/></a></div>
         </div>
         <div className="footer-bottom"><span>© {new Date().getFullYear()} PRIME IMDb WEB — AN INDEPENDENT EDITORIAL PROJECT</span><span>FILM IS BETTER WHEN SHARED. <b>✳</b></span></div>

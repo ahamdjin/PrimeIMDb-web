@@ -27,13 +27,13 @@ function Home() {
           <p className="eyebrow">ISSUE 001 <span className="eyebrow-line"></span> THE MOVING IMAGE</p>
           <h1>Some stories<br/>deserve a<br/><em>closer look.</em></h1>
           <p className="hero-intro">For the films you love, the ones you missed, and the ones you haven't found yet. A more thoughtful guide to the screen.</p>
-          <Link to="/movies" className="btn primary">Explore the films <ArrowUpRight size={19}/></Link>
+          <Link to="/movies" search={{page:1}} className="btn primary">Explore the films <ArrowUpRight size={19}/></Link>
           <div className="hero-bottom"><span>INDEPENDENT FILM DISCOVERY</span><ArrowDown size={18}/><span>SCROLL TO EXPLORE</span></div>
         </div>
         <div className="hero-art">
           {spotlight?.backdrop || spotlight?.poster ? <img src={spotlight.backdrop || spotlight.poster || ''} alt={spotlight.title + ' film artwork'} fetchPriority="high" /> : <div className="hero-art-placeholder"><span>THE ART<br/>OF CINEMA.</span></div>}
           <div className="hero-frame"/>
-          <div className="hero-caption"><div><span>THIS WEEK'S SPOTLIGHT</span><strong>{spotlight?.title || 'Every film has a story.'}</strong></div>{spotlight && <Link to="/$kind/$id" params={{kind:spotlight.kind,id:String(spotlight.id)}} aria-label={'Explore ' + spotlight.title}><ArrowUpRight size={20}/></Link>}</div>
+          <div className="hero-caption"><div><span>THIS WEEK'S SPOTLIGHT</span><strong>{spotlight?.title || 'Every film has a story.'}</strong></div>{spotlight && <Link to="/$kind/$id" search={{region:"US"}} params={{kind:spotlight.kind,id:String(spotlight.id)}} aria-label={'Explore ' + spotlight.title}><ArrowUpRight size={20}/></Link>}</div>
           <span className="hero-side-label">THE FILM JOURNAL / VOL. 01</span>
         </div>
       </div>
@@ -46,12 +46,12 @@ function Home() {
       </section>
       <Section eyebrow="THE WEEKLY EDIT / 01" title="Films in the conversation." items={movies} href="/movies" ranked />
       <section className="featured-editorial">
-        <div className="featured-copy"><span className="eyebrow">THE OPEN-SCREEN EDIT</span><h2>Great cinema.<br/><em>On your terms.</em></h2><p>Discover films listed by movie-data providers as free or ad-supported. No misleading links, no guessing: always confirm the offer with the official platform.</p><Link to="/free-movies" className="btn inverse">Find free films <ArrowUpRight size={18}/></Link><span className="microcopy">AVAILABILITY VARIES BY REGION AND DATE.</span></div>
-        <div className="featured-posters">{(free.length ? free : secondary).slice(0,3).map((m,i)=><Link to="/$kind/$id" params={{kind:m.kind,id:String(m.id)}} key={m.kind+m.id} className={'stacked-poster stacked-'+i}><img src={m.poster||m.backdrop||''} alt={m.title+' poster'} loading="lazy"/></Link>)}{!free.length&&!secondary.length&&<span className="featured-fallback">A WORLD OF STORIES<br/>IS WAITING.</span>}</div>
+        <div className="featured-copy"><span className="eyebrow">THE OPEN-SCREEN EDIT</span><h2>Great cinema.<br/><em>On your terms.</em></h2><p>Discover films listed by movie-data providers as free or ad-supported. No misleading links, no guessing: always confirm the offer with the official platform.</p><Link to="/free-movies" search={{page:1,region:"US"}} className="btn inverse">Find free films <ArrowUpRight size={18}/></Link><span className="microcopy">AVAILABILITY VARIES BY REGION AND DATE.</span></div>
+        <div className="featured-posters">{(free.length ? free : secondary).slice(0,3).map((m,i)=><Link to="/$kind/$id" search={{region:"US"}} params={{kind:m.kind,id:String(m.id)}} key={m.kind+m.id} className={'stacked-poster stacked-'+i}><img src={m.poster||m.backdrop||''} alt={m.title+' poster'} loading="lazy"/></Link>)}{!free.length&&!secondary.length&&<span className="featured-fallback">A WORLD OF STORIES<br/>IS WAITING.</span>}</div>
       </section>
       <Section eyebrow="THE WEEKLY EDIT / 02" title="Series worth staying in for." items={tv} href="/tv"/>
       <div className="journal-divider"><span>✳</span><span>THE END OF THIS PAGE IS JUST THE BEGINNING.</span><span>✳</span></div>
-      <section className="journal-close"><span className="eyebrow">FIND YOUR NEXT FAVORITE</span><h2>What are you in<br/><em>the mood for?</em></h2><form action="/search" method="get" className="large-search"><input name="q" required minLength={2} placeholder="A title, a feeling, a name..." aria-label="Search movie titles"/><button type="submit"><ArrowUpRight size={26}/></button></form><div className="suggestions"><span>OR EXPLORE</span><Link to="/genres">BY GENRE ↗</Link><Link to="/tv">TELEVISION ↗</Link><Link to="/free-movies">FREE TO WATCH ↗</Link></div></section>
+      <section className="journal-close"><span className="eyebrow">FIND YOUR NEXT FAVORITE</span><h2>What are you in<br/><em>the mood for?</em></h2><form action="/search" method="get" className="large-search"><input name="q" required minLength={2} placeholder="A title, a feeling, a name..." aria-label="Search movie titles"/><button type="submit"><ArrowUpRight size={26}/></button></form><div className="suggestions"><span>OR EXPLORE</span><Link to="/genres">BY GENRE ↗</Link><Link to="/tv" search={{page:1}}>TELEVISION ↗</Link><Link to="/free-movies" search={{page:1,region:"US"}}>FREE TO WATCH ↗</Link></div></section>
       {!configured && <aside className="setup-notice">LIVE CATALOG NOT CONNECTED: add <code>TMDB_API_READ_TOKEN</code> in your hosting environment to populate every section.</aside>}
     </div>
   </>
