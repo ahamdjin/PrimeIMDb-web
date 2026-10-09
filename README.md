@@ -1,50 +1,104 @@
-# Prime IMDb Web — Screenbox-inspired movie discovery, API-only
+# Screenbox
 
-A responsive, dark, cinematic movie and television discovery website built with TanStack Start, TanStack Router, Vite, Nitro, React 19, and third-party APIs. The design takes inspiration from [Screenbox](https://github.com/Lazhari/react-movies-finder): cinematic featured titles, compact poster rails, ratings, genre shortcuts and rich title pages. We have not copied its Next.js implementation.
+> Formerly **Movies Finder**. The project has been renamed to Screenbox as of v3. The repository name (`react-movies-finder`) remains unchanged.
 
-## No database is required
+A lightweight, open-source movie and TV show discovery app. Browse trending titles, explore genres, build shareable watchlists, and find your next watch. No accounts, no tracking.
 
-This project does not use PostgreSQL, Prisma, MongoDB, Supabase, or any internal film catalog. Film pages use **TMDB IDs as canonical URLs** and fetch metadata from remote APIs server-side. Recent results use a bounded, short-lived **in-memory cache**, not permanent storage. Hosted instances can have separate caches.
+Built with Next.js 16, React 19, Tailwind CSS 4, and the TMDB API.
 
-### API keys / data providers
+## Features
 
-| Environment variable | Usage |
-|---|---|
-| TMDB_API_READ_TOKEN (or TMDB_API_KEY) | **Required**. Film/TV catalog, cast, posters, trailers, genres, recommendations and TMDB/JustWatch watch-provider data |
-| OMDB_API_KEY | Optional. Additional IMDb-linked ratings and awards, displayed separately with source labels |
-| WATCHMODE_API_KEY | Optional. Extra country-specific viewing providers and official deep links where provided. Credit-priced API; may charge 2 credits per title lookup by TMDB ID |
-| ENABLE_TVMAZE=true | Optional. Public TVmaze API supplements TV status/network, matched by IMDb ID |
-| SITE_URL | Your actual production HTTPS origin (robots/sitemap) |
-| VITE_SITE_URL | **Public**, non-secret origin for canonical SEO links |
+- **Home**: trending spotlight hero, horizontal carousels for trending/popular/upcoming
+- **Movie Details**: cinematic hero, trailer player, cast, reviews, recommendations, watch providers, collection links
+- **TV Show Details**: status badges, season browser with episode lists, network logos, next/last episode info
+- **Genres**: backdrop-image genre cards for movies, dedicated TV genre browse with sorting
+- **Upcoming**: discover endpoint with future date range, spotlight hero, countdown badges, grouped by month
+- **Search**: multi-search with results split by Movies/TV Shows
+- **Surprise Me**: random movie picker with genre and streaming provider filters
+- **Watchlist**: localStorage-based, shareable via URL (base64 encoded), bookmark toggle on detail pages
+- **Actors**: cinematic hero with best performances highlight, filmography grouped by decade
+- **Collections**: hero with average rating, movies in release order
+- **Seasons**: per-season episode list with best-rated episode hero, trailer, watch providers
 
-Do not prefix private keys with VITE_. The website works with TMDB alone; all other API providers add progressively richer data. Server-only third-party failures will not prevent TMDB title data from rendering.
+## Tech Stack
 
-## Implemented pages
+| Layer      | Technology                               |
+| ---------- | ---------------------------------------- |
+| Framework  | Next.js 16.2.1 (App Router, Turbopack)   |
+| UI         | React 19, Tailwind CSS 4.2, shadcn/ui v2 |
+| Animation  | Framer Motion 12                         |
+| Icons      | Lucide React                             |
+| API        | TMDB (The Movie Database) v3             |
+| Deployment | Vercel                                   |
 
-- Home: Screenbox-style full-bleed hero slider, daily/weekly trends, popular movies and television, upcoming releases, free-watch area and genre shortcuts.
-- /movies, /tv, /genres, /genre/:id, /free-movies with country selection, /search?q=...
-- /movie/:id and /tv/:id: data-driven cast, crew, metadata, trailers, genre links, sources, ratings (TMDB and optional OMDb), optional TVmaze enrichment, and recommendations.
-- /person/:id: biography and filmography.
-- /watchlist: saved movie list in **your browser's localStorage** only, not a database. No account required. Watchlist is not synced across devices.
-- /journal/how-to-watch-movies-free-legally: useful contextual editorial content.
-- /robots.txt, /sitemap.xml: machine-readable discovery signals. Individual film pages get SEO metadata/JSON-LD based on API responses.
+## Getting Started
 
-## Local setup
+### Prerequisites
 
-1. Copy .env.example to .env and add TMDB_API_READ_TOKEN.
-2. Run npm install, then npm run dev.
-3. Run npm run build and npm run typecheck before merging.
+- Node.js 20+
+- A TMDB API key ([get one here](https://www.themoviedb.org/settings/api))
 
-## Deploying on Vercel
+### Setup
 
-Import the GitHub repository, use the TanStack Start framework, and add the API keys and your actual domain in Vercel Project → Settings → Environment Variables. Redeploy after changing variables.
+```bash
+git clone https://github.com/Lazhari/react-movies-finder.git
+cd react-movies-finder
+npm install
+```
 
-## Performance and scale without a database
+Create a `.env.local` file (see `.env.example`):
 
-API-only catalogs are practical, but every uncached API request needs a network round trip and consumes quota. Add edge cache/CDN policies as traffic grows, monitor provider credits/quotas, and throttle abuse at the network edge. The current sitemap is intentionally limited to real, reasonably complete titles discovered from current API results. Building a genuinely comprehensive IMDb-scale archive and user-written reviews without any persistent storage will be limiting.
+```bash
+MOVIE_DB_URL=https://api.themoviedb.org/3
+MOVIE_DB_API_KEY=your_tmdb_api_key_here
+```
 
-## Licenses and trademark checks
+### Development
 
-TMDB's free developer license is for noncommercial usage: get the proper commercial rights for advertising/affiliate monetization. Show the required official TMDB attribution logo and JustWatch attribution for viewing data, and respect the commercial terms of OMDb, TVmaze and Watchmode. Review “Prime IMDb” for trademark conflicts with IMDb and Prime Video before commercial launch.
+```bash
+npm run dev
+```
 
-Watch-provider listings cannot establish distribution rights for an embedded third-party player. This discovery site links to official viewing sources and does not host movies.
+Open [http://localhost:3000](http://localhost:3000).
+
+### Build
+
+```bash
+npm run build
+npm start
+```
+
+## Project Structure
+
+```
+src/
+  app/              # Next.js App Router pages
+    actors/         # Actor detail
+    collections/    # Collection detail
+    genres/         # Movie genre browse
+    movies/         # Movie detail
+    search/         # Search results
+    surprise/       # Random picker
+    tv/             # TV shows, detail, genres, seasons
+    upcoming/       # Upcoming movies
+    watchlist/      # Shareable watchlist
+  components/
+    blocks/         # Header, Footer
+    media/          # MediaCard, MediaCarousel, HeroSlider, RatingBadge,
+                    #   VideoPlayer, ProviderList, WatchlistButton, PhotoGrid
+    movies/         # Movie hero, cast, reviews
+    tv/             # TV hero, seasons
+    actors/         # Actor hero
+    ui/             # shadcn/ui components
+  hooks/            # useWatchlist
+  lib/
+    api/            # TMDB client (tmdb.ts) and types
+    constants.ts    # Image sizes, YouTube embed URL
+    movies.ts       # URL helpers, date formatting
+    utils.ts        # cn() utility
+  types/            # TypeScript interfaces
+```
+
+## License
+
+MIT License. Copyright (c) 2020 Lazhari.

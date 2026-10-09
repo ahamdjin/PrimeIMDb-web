@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [master, release/*]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm run build
+        env:
+          MOVIE_DB_URL: ${{ secrets.MOVIE_DB_URL }}
+          MOVIE_DB_API_KEY: ${{ secrets.MOVIE_DB_API_KEY }}
