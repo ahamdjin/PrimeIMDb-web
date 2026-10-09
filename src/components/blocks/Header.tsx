@@ -77,7 +77,7 @@ export default function Header() {
           className="flex items-center gap-2 text-xl font-bold font-display text-primary"
         >
           <Clapperboard className="h-5 w-5" />
-          <span className="hidden sm:inline">Screenbox</span>
+          <span className="hidden sm:inline">Prime IMDb</span>
           <span className="sm:hidden">SB</span>
         </Link>
 
@@ -263,7 +263,7 @@ export default function Header() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-[12px] font-medium text-primary/40">
-                        Screenbox v3
+                        Prime IMDb v3
                       </p>
                       <p className="text-[11px] text-muted-foreground/25">
                         Last updated Mar 2026

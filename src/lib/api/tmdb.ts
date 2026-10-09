@@ -15,7 +15,8 @@ import {
 } from "./types";
 
 const BASE_URL = process.env.MOVIE_DB_URL ?? "https://api.themoviedb.org/3";
-const API_KEY = process.env.MOVIE_DB_API_KEY ?? "";
+const API_KEY = process.env.TMDB_API_KEY ?? process.env.MOVIE_DB_API_KEY ?? "";
+const READ_TOKEN = process.env.TMDB_API_READ_TOKEN ?? "";
 
 class TMDBClientError extends Error {
   constructor(
@@ -32,7 +33,7 @@ export async function tmdbFetch<T>(
   params?: Record<string, string>,
 ): Promise<T> {
   const url = new URL(`${BASE_URL}${path}`);
-  url.searchParams.set("api_key", API_KEY);
+  if (!READ_TOKEN && API_KEY) url.searchParams.set("api_key", API_KEY);
 
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -45,6 +46,7 @@ export async function tmdbFetch<T>(
   const response = await fetch(url.toString(), {
     headers: {
       Accept: "application/json",
+      ...(READ_TOKEN ? { Authorization: `Bearer ${READ_TOKEN}` } : {}),
     },
     next: { revalidate: 3600 },
   });

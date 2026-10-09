@@ -9,8 +9,8 @@ const inter = Inter({ subsets: ["latin"] });
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Screenbox",
-  description: "Find your favorite movies and TV shows",
+  title: "Prime IMDb | Movie & TV Discovery",
+  description: "Explore trending movies, TV shows, cast, ratings, trailers, and official viewing availability.",
 };
 
 export default function RootLayout({
