@@ -1,58 +1,49 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowUpRight, ArrowDown, Play, Star } from 'lucide-react'
+import { ArrowUpRight, Search, ChevronRight, Clapperboard, Tv, Star, CalendarDays } from 'lucide-react'
 import { getHome } from '../lib/server'
-import { Section, Card } from '../components/Cards'
+import { Section } from '../components/Cards'
+import FeatureSlider from '../components/FeatureSlider'
 import { canonical } from '../lib/seo'
 export const Route = createFileRoute('/')({
   loader: () => getHome(),
   head: () => ({
     meta: [
-      { title: 'Discover Cinema, TV & Free Movies | Prime IMDb' },
-      { name: 'description', content: 'An editorial guide to film and TV. Discover new stories, acclaimed classics, casts, ratings and legal free-to-watch availability.' },
-      { property: 'og:title', content: 'Prime IMDb — A Journal of Film & Television' },
+      { title: 'Prime IMDb — Discover Movies, TV Shows, Ratings & Free Viewing Options' },
+      { name:'description', content:'Discover trending movies, popular TV shows, cast, reviews, trailers, genres, and official free or ad-supported viewing options.' },
+      { property:'og:title', content:'Prime IMDb — Your next movie starts here' },
     ],
     links: canonical('/'),
   }),
   component: Home,
 })
 function Home() {
-  const { movies, tv, free, configured } = Route.useLoaderData()
-  const spotlight = movies.find(m => m.backdrop && m.overview) || movies[0]
-  const secondary = movies.slice(1,4)
+  const {movies, trendingToday, popularMovies, tv, free, upcoming, movieGenres, configured} = Route.useLoaderData()
+  const spotlight = (trendingToday.length ? trendingToday : movies).filter(movie => movie.backdrop)
   return <>
-    <section className="opening-hero">
-      <div className="page-container hero-topline"><span><Star size={12} fill="currentColor"/> DISCOVER THE STORIES THAT STAY</span><span>AN EDITORIAL FILM DISCOVERY EXPERIENCE</span></div>
-      <div className="page-container hero-grid">
-        <div className="hero-copy">
-          <p className="eyebrow">ISSUE 001 <span className="eyebrow-line"></span> THE MOVING IMAGE</p>
-          <h1>Some stories<br/>deserve a<br/><em>closer look.</em></h1>
-          <p className="hero-intro">For the films you love, the ones you missed, and the ones you haven't found yet. A more thoughtful guide to the screen.</p>
-          <Link to="/movies" search={{page:1}} className="btn primary">Explore the films <ArrowUpRight size={19}/></Link>
-          <div className="hero-bottom"><span>INDEPENDENT FILM DISCOVERY</span><ArrowDown size={18}/><span>SCROLL TO EXPLORE</span></div>
-        </div>
-        <div className="hero-art">
-          {spotlight?.backdrop || spotlight?.poster ? <img src={spotlight.backdrop || spotlight.poster || ''} alt={spotlight.title + ' film artwork'} fetchPriority="high" /> : <div className="hero-art-placeholder"><span>THE ART<br/>OF CINEMA.</span></div>}
-          <div className="hero-frame"/>
-          <div className="hero-caption"><div><span>THIS WEEK'S SPOTLIGHT</span><strong>{spotlight?.title || 'Every film has a story.'}</strong></div>{spotlight && <Link to="/$kind/$id" search={{region:"US"}} params={{kind:spotlight.kind,id:String(spotlight.id)}} aria-label={'Explore ' + spotlight.title}><ArrowUpRight size={20}/></Link>}</div>
-          <span className="hero-side-label">THE FILM JOURNAL / VOL. 01</span>
+    <FeatureSlider items={spotlight}/>
+    <div className="page-container home-content">
+      <div className="quick-nav">
+        <div className="quick-label"><span className="eyebrow">EXPLORE</span><strong>What are you in the mood for?</strong></div>
+        <div className="genre-pills">
+          {movieGenres.slice(0,13).map(genre => <Link key={genre.id} to="/genre/$id" params={{id:String(genre.id)}}>{genre.name}</Link>)}
+          <Link to="/genres">All genres <ChevronRight size={14}/></Link>
         </div>
       </div>
-      <div className="marquee" aria-hidden="true"><div>DISCOVER ✳ WATCH ✳ THINK ✳ FEEL ✳ REMEMBER ✳ DISCOVER ✳ WATCH ✳ THINK ✳ FEEL ✳ REMEMBER ✳ </div></div>
-    </section>
-    <div className="page-container body-sections">
-      <section className="intro-editorial">
-        <div><span className="eyebrow">A NEW KIND OF FILM GUIDE</span><h2>Curiosity looks<br/><em>good on you.</em></h2></div>
-        <div><p>There is more to cinema than a rating. Find the people behind the work, the stories that connect us, and verified places to watch when you're ready.</p><Link to="/genres" className="text-link">Follow your curiosity <ArrowUpRight size={18}/></Link></div>
+      <Section eyebrow="WHAT EVERYONE'S WATCHING" title="Trending Today" href="/movies" ranked items={trendingToday}/>
+      <Section eyebrow="DON'T MISS OUT" title="Trending This Week" href="/movies" items={movies}/>
+      <section className="free-banner">
+        <div className="free-banner-copy"><span className="eyebrow"><Star size={13} fill="currentColor"/> YOUR FREE MOVIE GUIDE</span><h2>Great movies.<br/><em>No subscription.</em></h2><p>Find movies available from legitimate free and ad-supported providers. Choose your country, discover a film, and check its official viewing options.</p><Link to="/free-movies" search={{page:1,region:'US'}} className="btn primary">Explore free movies <ArrowUpRight size={18}/></Link></div>
+        <div className="free-banner-posters">{free.slice(0,4).filter(m=>m.poster).map((m,i)=><Link to="/$kind/$id" params={{kind:m.kind,id:String(m.id)}} search={{region:'US'}} key={m.id} className={'free-poster free-poster-'+i}><img src={m.poster||''} alt={m.title+' poster'} loading="lazy"/></Link>)}</div>
       </section>
-      <Section eyebrow="THE WEEKLY EDIT / 01" title="Films in the conversation." items={movies} href="/movies" ranked />
-      <section className="featured-editorial">
-        <div className="featured-copy"><span className="eyebrow">THE OPEN-SCREEN EDIT</span><h2>Great cinema.<br/><em>On your terms.</em></h2><p>Discover films listed by movie-data providers as free or ad-supported. No misleading links, no guessing: always confirm the offer with the official platform.</p><Link to="/free-movies" search={{page:1,region:"US"}} className="btn inverse">Find free films <ArrowUpRight size={18}/></Link><span className="microcopy">AVAILABILITY VARIES BY REGION AND DATE.</span></div>
-        <div className="featured-posters">{(free.length ? free : secondary).slice(0,3).map((m,i)=><Link to="/$kind/$id" search={{region:"US"}} params={{kind:m.kind,id:String(m.id)}} key={m.kind+m.id} className={'stacked-poster stacked-'+i}><img src={m.poster||m.backdrop||''} alt={m.title+' poster'} loading="lazy"/></Link>)}{!free.length&&!secondary.length&&<span className="featured-fallback">A WORLD OF STORIES<br/>IS WAITING.</span>}</div>
-      </section>
-      <Section eyebrow="THE WEEKLY EDIT / 02" title="Series worth staying in for." items={tv} href="/tv"/>
-      <div className="journal-divider"><span>✳</span><span>THE END OF THIS PAGE IS JUST THE BEGINNING.</span><span>✳</span></div>
-      <section className="journal-close"><span className="eyebrow">FIND YOUR NEXT FAVORITE</span><h2>What are you in<br/><em>the mood for?</em></h2><form action="/search" method="get" className="large-search"><input name="q" required minLength={2} placeholder="A title, a feeling, a name..." aria-label="Search movie titles"/><button type="submit"><ArrowUpRight size={26}/></button></form><div className="suggestions"><span>OR EXPLORE</span><Link to="/genres">BY GENRE ↗</Link><Link to="/tv" search={{page:1}}>TELEVISION ↗</Link><Link to="/free-movies" search={{page:1,region:"US"}}>FREE TO WATCH ↗</Link></div></section>
-      {!configured && <aside className="setup-notice">LIVE CATALOG NOT CONNECTED: add <code>TMDB_API_READ_TOKEN</code> in your hosting environment to populate every section.</aside>}
+      <Section eyebrow="FRESH PICKS" title="Popular Movies" href="/movies" items={popularMovies}/>
+      <Section eyebrow="THE SERIES EVERYONE TALKS ABOUT" title="Popular TV Shows" href="/tv" items={tv}/>
+      <Section eyebrow="EXPLORE LEGITIMATE FREE & AD-SUPPORTED TITLES" title="Free to Watch" href="/free-movies" items={free}/>
+      <Section eyebrow="COMING TO THE BIG SCREEN" title="Upcoming Movies" href="/movies" items={upcoming}/>
+      <div className="home-discovery">
+        <div><span className="eyebrow"><Clapperboard size={15}/> MOVIE EXPLORER</span><h2>Find something<br/>worth watching.</h2><p>Search by title or browse actors, genres and highly rated films.</p></div>
+        <form className="large-search" action="/search" method="get"><Search size={22}/><input type="search" name="q" minLength={2} required placeholder="Search movies and TV shows..." aria-label="Search movie catalog"/><button type="submit">Search <ArrowUpRight size={17}/></button></form>
+      </div>
+      {!configured && <div className="setup-notice"><b>API SETUP NEEDED</b> — Add <code>TMDB_API_READ_TOKEN</code> to your hosting environment. Movie data, images, cast and discovery will populate automatically.</div>}
     </div>
   </>
 }

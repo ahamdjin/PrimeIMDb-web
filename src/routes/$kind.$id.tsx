@@ -3,6 +3,7 @@ import { ArrowUpRight, Play, CalendarDays, Clock3, Star } from 'lucide-react'
 import { getDetails } from '../lib/server'
 import { image } from '../lib/tmdb'
 import { Grid } from '../components/Cards'
+import WatchlistButton from '../components/WatchlistButton'
 import { canonical, schema, movieSchema, movieMeta } from '../lib/seo'
 
 const countries = [{code:'US',name:'United States'},{code:'GB',name:'United Kingdom'},{code:'CA',name:'Canada'},{code:'AU',name:'Australia'},{code:'IN',name:'India'},{code:'PK',name:'Pakistan'},{code:'DE',name:'Germany'},{code:'FR',name:'France'}]
@@ -55,6 +56,7 @@ function Page() {
           <div className="detail-actions">
             {m.trailers?.[0] && <a href={'https://www.youtube.com/watch?v=' + encodeURIComponent(m.trailers[0].key)} target="_blank" rel="noopener noreferrer" className="btn inverse"><Play size={17} fill="currentColor"/> Watch trailer</a>}
             <a className="btn outline" href="#availability">Official viewing options <ArrowUpRight size={18}/></a>
+            <WatchlistButton movie={{id:m.id,kind:m.kind,title:m.title,poster:m.poster,year:m.year,rating:m.rating}}/>
           </div>
         </div>
       </div>

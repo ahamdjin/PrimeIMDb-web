@@ -68,18 +68,27 @@ function entries(data: any, kind: Kind): Movie[] {
     .filter((x: any) => Number.isInteger(x?.id) && x.id > 0 && x.adult !== true)
     .map((x: any) => normalized(x, kind))
 }
-export async function trending(kind: Kind): Promise<Movie[]> {
-  const result = await query<any>('/trending/' + kind + '/week', { language: 'en-US' })
+export async function trending(kind: Kind, period: 'day' | 'week' = 'week'): Promise<Movie[]> {
+  const result = await query<any>('/trending/' + kind + '/' + period, { language: 'en-US' })
   return entries(result, kind)
 }
 export async function discover(kind: Kind, options: {
-  genre?: number; free?: boolean; page?: number; region?: string; sort?: string
+  genre?: number; free?: boolean; page?: number; region?: string; sort?: string; upcoming?: boolean
 } = {}): Promise<Listing> {
   const page = Math.max(1, Math.min(500, Math.floor(options.page || 1)))
   const params: Record<string, number | string | undefined> = {
     page, sort_by: options.sort || 'popularity.desc', include_adult: 'false', language: 'en-US',
   }
   if (options.genre) params.with_genres = options.genre
+  if (options.upcoming && kind === 'movie') {
+    const start = new Date()
+    const end = new Date(start.getTime() + 90 * 24 * 60 * 60 * 1000)
+    params['primary_release_date.gte'] = start.toISOString().slice(0,10)
+    params['primary_release_date.lte'] = end.toISOString().slice(0,10)
+    params.sort_by = 'primary_release_date.asc'
+    params['vote_count.gte'] = 0
+    params.with_release_type = '2|3'
+  }
   if (options.free) {
     params.watch_region = /^[A-Z]{2}$/.test(options.region || 'US') ? options.region : 'US'
     params.with_watch_monetization_types = 'free|ads'
