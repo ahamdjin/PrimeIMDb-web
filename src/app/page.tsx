@@ -65,7 +65,7 @@ export default async function Home() {
         <section role="status" className="mx-4 mt-8 rounded-xl border border-amber/40 bg-amber/10 px-6 py-5 sm:mx-8">
           <h2 className="text-lg font-semibold text-primary">Movie catalog is not connected yet</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Add TMDB_API_READ_TOKEN or TMDB_API_KEY in this Vercel project's
+            Add TMDB_API_READ_TOKEN or TMDB_API_KEY in this Vercel project&apos;s
             Environment Variables, then redeploy to load Screenbox movie data.
           </p>
         </section>
