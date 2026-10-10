@@ -9,6 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://prime-imdb-web.vercel.app"),
   title: "Prime IMDb | Movie & TV Discovery",
   description: "Explore trending movies, TV shows, cast, ratings, trailers, and official viewing availability.",
 };

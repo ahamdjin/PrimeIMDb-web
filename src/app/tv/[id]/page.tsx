@@ -24,7 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { show } = await getTVShowPageData(Number(id));
     return {
-      title: `${show.name} | Prime IMDb`,
+      title: `${show.name} (${show.first_air_date?.slice(0,4) || "Series"}) — Cast, Seasons & Where to Watch | Prime IMDb`,
+      alternates: { canonical: `/tv/${show.id}` },
+      twitter: { card: "summary_large_image" },
       description: show.overview,
       openGraph: {
         title: show.name,
@@ -71,8 +73,25 @@ export default async function TVShowPage({ params, searchParams }: Props) {
   // Split cast into lead (first 6) and supporting
   const leadCast = credits.cast.slice(0, 8);
 
+  const tvSchema = {
+    "@context": "https://schema.org", "@type": "TVSeries",
+    name: show.name, description: show.overview,
+    image: show.poster_path ? "https://image.tmdb.org/t/p/w500" + show.poster_path : undefined,
+    datePublished: show.first_air_date || undefined,
+    genre: show.genres.map(g => g.name),
+    numberOfSeasons: show.number_of_seasons,
+    numberOfEpisodes: show.number_of_episodes,
+    actor: credits.cast.slice(0, 12).map(p => ({ "@type": "Person", name: p.name })),
+    sameAs: enriched.imdbId ? "https://www.imdb.com/title/" + enriched.imdbId + "/" : undefined,
+    ...(show.vote_average > 0 && show.vote_count > 0 ? {
+      aggregateRating: { "@type": "AggregateRating", ratingValue: Number(show.vote_average.toFixed(1)),
+        ratingCount: show.vote_count, bestRating: 10, worstRating: 0 },
+    } : {}),
+  };
   return (
     <main className="flex flex-1 flex-col gap-12 pb-16">
+      <script type="application/ld+json"
+        dangerouslySetInnerHTML={{__html: JSON.stringify(tvSchema).replace(/</g,"\\u003c")}} />
       <TVHero
         show={show}
         trailerKey={trailerKey}

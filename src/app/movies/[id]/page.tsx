@@ -20,7 +20,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { movie } = await getMoviePageData(Number(id));
     return {
-      title: `${movie.title} | Prime IMDb`,
+      title: `${movie.title} (${movie.release_date?.slice(0,4) || "Film"}) — Cast, Ratings & Where to Watch | Prime IMDb`,
+      alternates: { canonical: `/movies/${movie.id}` },
+      twitter: { card: "summary_large_image" },
       description: movie.overview,
       openGraph: {
         title: movie.title,
@@ -64,8 +66,23 @@ export default async function MoviePage({ params, searchParams }: Props) {
     movie.imdb_id, region,
   );
 
+  const movieSchema = {
+    "@context": "https://schema.org", "@type": "Movie",
+    name: movie.title, description: movie.overview,
+    image: movie.poster_path ? "https://image.tmdb.org/t/p/w500" + movie.poster_path : undefined,
+    datePublished: movie.release_date || undefined,
+    genre: movie.genres.map(g => g.name),
+    actor: credits.cast.slice(0, 12).map(p => ({ "@type": "Person", name: p.name })),
+    sameAs: movie.imdb_id ? "https://www.imdb.com/title/" + movie.imdb_id + "/" : undefined,
+    ...(movie.vote_average > 0 && movie.vote_count > 0 ? {
+      aggregateRating: { "@type": "AggregateRating", ratingValue: Number(movie.vote_average.toFixed(1)),
+        ratingCount: movie.vote_count, bestRating: 10, worstRating: 0 },
+    } : {}),
+  };
   return (
     <main className="flex flex-1 flex-col gap-8 pb-12">
+      <script type="application/ld+json"
+        dangerouslySetInnerHTML={{__html: JSON.stringify(movieSchema).replace(/</g,"\\u003c")}} />
       <MovieHero
         movie={movie}
         trailerKey={trailerKey}

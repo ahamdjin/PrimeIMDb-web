@@ -51,6 +51,7 @@ export default async function Home() {
     popularTV,
     upcoming,
     genres,
+    freeMovies,
   } = await getHomePageData();
 
   const showSetupNotice = trendingDay.length === 0 && trendingWeek.length === 0 && popularMovies.length === 0;
@@ -93,6 +94,18 @@ export default async function Home() {
 
         <MediaCarousel title="Trending This Week">
           {renderCarouselItems(trendingWeek)}
+        </MediaCarousel>
+
+        <MediaCarousel title="Free Movies — Watch Legally" viewAllHref="/free-movies">
+          {freeMovies.slice(0, 20).map((movie, i) => (
+            <div key={movie.id} className="w-[160px] shrink-0 sm:w-[185px]">
+              <MediaCard
+                id={movie.id} title={movie.title} posterPath={movie.poster_path}
+                rating={movie.vote_average} year={movie.release_date}
+                mediaType="movie" index={i}
+              />
+            </div>
+          ))}
         </MediaCarousel>
 
         <MediaCarousel title="Popular Movies" viewAllHref="/movies">

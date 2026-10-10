@@ -6,10 +6,11 @@ import {
   fetchPopularTVShows,
   fetchTrending,
   fetchUpcomingMovies,
+  discoverMovies,
 } from "@/lib/api/tmdb";
 
 export async function getHomePageData() {
-  const [trendingDay, trendingWeek, popular, popularTV, upcoming, genresData] =
+  const [trendingDay, trendingWeek, popular, popularTV, upcoming, genresData, freeMovies] =
     await Promise.all([
       fetchTrending("all", "day"),
       fetchTrending("all", "week"),
@@ -17,6 +18,7 @@ export async function getHomePageData() {
       fetchPopularTVShows(1),
       fetchUpcomingMovies(1),
       fetchMovieGenres(),
+      discoverMovies({ watch_region: "US", with_watch_monetization_types: "free|ads", sort_by: "popularity.desc", page: 1 }),
     ]);
 
   return {
@@ -26,5 +28,6 @@ export async function getHomePageData() {
     popularTV: popularTV.results,
     upcoming: upcoming.results,
     genres: genresData.genres,
+    freeMovies: freeMovies.results,
   };
 }
