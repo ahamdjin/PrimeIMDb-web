@@ -7,6 +7,8 @@ import TVHero from "@/components/tv/hero";
 import Seasons from "@/components/tv/seasons";
 import { Users } from "lucide-react";
 import { Metadata } from "next";
+import { enrichTitle } from "@/lib/api/enrichment";
+import { EnrichmentPanel, safeRegion } from "@/components/media/enrichment-panel";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -14,6 +16,7 @@ import { getTVShowPageData } from "../actions";
 
 interface Props {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{region?:string}>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -21,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { show } = await getTVShowPageData(Number(id));
     return {
-      title: `${show.name} | Screenbox`,
+      title: `${show.name} | Prime IMDb`,
       description: show.overview,
       openGraph: {
         title: show.name,
@@ -36,11 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function TVShowPage({ params }: Props) {
+export default async function TVShowPage({ params, searchParams }: Props) {
   const { id } = await params;
   const showId = Number(id);
-
-  if (isNaN(showId)) notFound();
+  if (!Number.isSafeInteger(showId) || showId < 1) notFound();
 
   let data;
   try {
@@ -55,8 +57,16 @@ export default async function TVShowPage({ params }: Props) {
     trailerKey,
     reviews,
     recommendations,
-    watchProviders,
+    watchProvidersByRegion,
   } = data;
+  const region = safeRegion((await searchParams).region);
+  const watchProviders = watchProvidersByRegion[region];
+  const enriched = await enrichTitle(
+    "tv", show.id,
+    show.name,
+    Number(show.first_air_date?.slice(0, 4)) || 0,
+    undefined, region,
+  );
 
   // Split cast into lead (first 6) and supporting
   const leadCast = credits.cast.slice(0, 8);
@@ -132,6 +142,8 @@ export default async function TVShowPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      <EnrichmentPanel data={enriched} region={region} kind="tv" />
 
       {/* Reviews */}
       <Reviews reviews={reviews} />

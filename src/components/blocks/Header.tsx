@@ -32,6 +32,7 @@ const navLinks = [
   { href: "/", label: "Home", subtitle: "Featured & trending", icon: Home, color: "bg-blue-500/20 text-blue-400" },
   { href: "/upcoming", label: "Upcoming", subtitle: "Coming soon to theaters", icon: Clock, color: "bg-purple-500/20 text-purple-400" },
   { href: "/tv", label: "TV Shows", subtitle: "Series & episodes", icon: Tv, color: "bg-amber/20 text-amber" },
+  { href: "/free-movies", label: "Free Movies", subtitle: "Free & ad-supported titles", icon: Clapperboard, color: "bg-green-500/20 text-green-400" },
   { href: "/genres", label: "Genres", subtitle: "Browse by category", icon: Layers, color: "bg-green-500/20 text-green-400" },
   { href: "/watchlist", label: "Watchlist", subtitle: "", icon: Bookmark, color: "bg-red-500/20 text-red-400" },
   { href: "/surprise", label: "Surprise Me", subtitle: "Random pick for tonight", icon: Dice5, color: "bg-amber/20 text-amber" },

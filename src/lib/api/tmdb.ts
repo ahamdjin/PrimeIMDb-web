@@ -243,6 +243,8 @@ export async function discoverMovies(
     queryParams.with_watch_providers = params.with_watch_providers;
   if (params.watch_region)
     queryParams.watch_region = params.watch_region;
+  if (params.with_watch_monetization_types)
+    queryParams.with_watch_monetization_types = params.with_watch_monetization_types;
 
   return tmdbFetch("/discover/movie", queryParams);
 }

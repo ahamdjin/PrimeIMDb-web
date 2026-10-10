@@ -21,6 +21,8 @@ export interface WatchProvider {
 export interface WatchProviderResult {
   link: string;
   flatrate?: WatchProvider[];
+  free?: WatchProvider[];
+  ads?: WatchProvider[];
   rent?: WatchProvider[];
   buy?: WatchProvider[];
 }
@@ -51,6 +53,7 @@ export interface DiscoverParams {
   with_original_language?: string;
   with_watch_providers?: string;
   watch_region?: string;
+  with_watch_monetization_types?: string;
 }
 
 export interface StreamingProvider {

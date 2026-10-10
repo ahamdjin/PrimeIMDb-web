@@ -43,6 +43,8 @@ export function ProviderList({ providers }: ProviderListProps) {
   if (!providers) return null;
 
   const hasAny =
+    providers.free?.length ||
+    providers.ads?.length ||
     providers.flatrate?.length ||
     providers.rent?.length ||
     providers.buy?.length;
@@ -53,6 +55,8 @@ export function ProviderList({ providers }: ProviderListProps) {
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Where to Watch</h3>
       <div className="flex flex-wrap gap-8">
+        {providers.free && <ProviderSection title="Free" items={providers.free} />}
+        {providers.ads && <ProviderSection title="Free with ads" items={providers.ads} />}
         {providers.flatrate && (
           <ProviderSection title="Stream" items={providers.flatrate} />
         )}
@@ -68,10 +72,10 @@ export function ProviderList({ providers }: ProviderListProps) {
         <a
           href={providers.link}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener noreferrer nofollow"
           className="underline hover:text-primary"
         >
-          JustWatch
+          TMDB / JustWatch
         </a>
       </p>
     </div>

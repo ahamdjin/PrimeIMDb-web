@@ -36,5 +36,6 @@ export async function getTVShowPageData(id: number) {
     reviews: reviews.results.slice(0, 10),
     recommendations: recommendations.results.slice(0, 20),
     watchProviders: watchProviders.results?.US ?? undefined,
+    watchProvidersByRegion: watchProviders.results ?? {},
   };
 }

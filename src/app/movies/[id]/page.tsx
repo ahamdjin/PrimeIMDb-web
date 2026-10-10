@@ -4,12 +4,15 @@ import Cast from "@/components/movies/cast";
 import MovieHero from "@/components/movies/hero";
 import Reviews from "@/components/movies/reviews";
 import { Metadata } from "next";
+import { enrichTitle } from "@/lib/api/enrichment";
+import { EnrichmentPanel, safeRegion } from "@/components/media/enrichment-panel";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMoviePageData } from "./actions";
 
 interface Props {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{region?:string}>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -17,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { movie } = await getMoviePageData(Number(id));
     return {
-      title: `${movie.title} | Screenbox`,
+      title: `${movie.title} | Prime IMDb`,
       description: movie.overview,
       openGraph: {
         title: movie.title,
@@ -32,11 +35,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function MoviePage({ params }: Props) {
+export default async function MoviePage({ params, searchParams }: Props) {
   const { id } = await params;
   const movieId = Number(id);
-
-  if (isNaN(movieId)) notFound();
+  if (!Number.isSafeInteger(movieId) || movieId < 1) notFound();
 
   let data;
   try {
@@ -51,8 +53,16 @@ export default async function MoviePage({ params }: Props) {
     trailerKey,
     reviews,
     recommendations,
-    watchProviders,
+    watchProvidersByRegion,
   } = data;
+  const region = safeRegion((await searchParams).region);
+  const watchProviders = watchProvidersByRegion[region];
+  const enriched = await enrichTitle(
+    "movie", movie.id,
+    movie.title,
+    Number(movie.release_date?.slice(0, 4)) || 0,
+    movie.imdb_id, region,
+  );
 
   return (
     <main className="flex flex-1 flex-col gap-8 pb-12">
@@ -77,6 +87,8 @@ export default async function MoviePage({ params }: Props) {
       )}
 
       <Cast cast={credits.cast} />
+
+      <EnrichmentPanel data={enriched} region={region} kind="movie" />
 
       <Reviews reviews={reviews} />
 

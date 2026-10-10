@@ -8,6 +8,7 @@ const navColumns = [
       { href: "/", label: "Popular Movies" },
       { href: "/upcoming", label: "Upcoming" },
       { href: "/tv", label: "TV Shows" },
+      { href: "/free-movies", label: "Free Movies" },
       { href: "/genres", label: "Genres" },
     ],
   },
