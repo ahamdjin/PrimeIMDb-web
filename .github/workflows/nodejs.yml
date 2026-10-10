@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master, release/*]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
 
 jobs:
   build:
@@ -18,7 +18,5 @@ jobs:
       - run: npm ci
       - run: npm run type-check
       - run: npm run lint
+      # Build must work without a TMDB key. Vercel supplies production secrets.
       - run: npm run build
-        env:
-          MOVIE_DB_URL: ${{ secrets.MOVIE_DB_URL }}
-          MOVIE_DB_API_KEY: ${{ secrets.MOVIE_DB_API_KEY }}

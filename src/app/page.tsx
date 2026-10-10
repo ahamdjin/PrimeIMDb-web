@@ -53,12 +53,23 @@ export default async function Home() {
     genres,
   } = await getHomePageData();
 
+  const showSetupNotice = trendingDay.length === 0 && trendingWeek.length === 0 && popularMovies.length === 0;
+
   const heroSlides = trendingDay.slice(0, 5).map(toHeroSlide);
 
   return (
     <main className="flex flex-1 flex-col">
       <HeroSlider slides={heroSlides} />
 
+      {showSetupNotice && (
+        <section role="status" className="mx-4 mt-8 rounded-xl border border-amber/40 bg-amber/10 px-6 py-5 sm:mx-8">
+          <h2 className="text-lg font-semibold text-primary">Movie catalog is not connected yet</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Add TMDB_API_READ_TOKEN or TMDB_API_KEY in this Vercel project's
+            Environment Variables, then redeploy to load Screenbox movie data.
+          </p>
+        </section>
+      )}
       <div className="space-y-8 py-8">
         {/* Genre pills */}
         <div

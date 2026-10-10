@@ -18,6 +18,26 @@ const BASE_URL = process.env.MOVIE_DB_URL ?? "https://api.themoviedb.org/3";
 const API_KEY = process.env.TMDB_API_KEY ?? process.env.MOVIE_DB_API_KEY ?? "";
 const READ_TOKEN = process.env.TMDB_API_READ_TOKEN ?? "";
 
+// The public listing pages also render during Next.js production builds.
+// A missing/invalid key must not crash a deploy. Do not invent film data.
+const emptyListing = {
+  results: [],
+  genres: [],
+  page: 1,
+  total_pages: 0,
+  total_results: 0,
+};
+function isListingRequest(path: string): boolean {
+  return (
+    path.startsWith("/trending/") ||
+    path.startsWith("/discover/") ||
+    path.startsWith("/search/") ||
+    path.startsWith("/watch/providers/") ||
+    /^\/(movie|tv)\/(popular|upcoming|top_rated|now_playing|on_the_air|airing_today)$/.test(path) ||
+    /^\/genre\/(movie|tv)\/list$/.test(path)
+  );
+}
+
 class TMDBClientError extends Error {
   constructor(
     public statusCode: number,
@@ -32,6 +52,10 @@ export async function tmdbFetch<T>(
   path: string,
   params?: Record<string, string>,
 ): Promise<T> {
+  if (!READ_TOKEN && !API_KEY && isListingRequest(path)) {
+    return { ...emptyListing } as T;
+  }
+
   const url = new URL(`${BASE_URL}${path}`);
   if (!READ_TOKEN && API_KEY) url.searchParams.set("api_key", API_KEY);
 
@@ -52,6 +76,14 @@ export async function tmdbFetch<T>(
   });
 
   if (!response.ok) {
+    // TMDB status 401 / error code 7 means the API credential is invalid.
+    // Keep indexable public listing pages renderable while configuration is
+    // incomplete. Dynamic detail pages still surface genuine API errors.
+    if (response.status === 401 && isListingRequest(path)) {
+      console.error("[TMDB] API credentials were rejected. Check the Vercel environment variables.");
+      return { ...emptyListing } as T;
+    }
+
     const error: TMDBError = await response.json().catch(() => ({
       status_code: response.status,
       status_message: response.statusText,
